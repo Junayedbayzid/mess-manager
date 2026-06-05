@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a2332">
+<meta name="description" content="Mess Meal Manager - মেস হিসাব অ্যাপ">
+<title>মেস ম্যানেজার</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1923;
+    --surface: #1a2736;
+    --surface2: #243447;
+    --surface3: #2e4159;
+    --accent: #00d4aa;
+    --accent2: #ff6b35;
+    --accent3: #ffd166;
+    --text: #e8f0fe;
+    --text2: #9ab;
+    --text3: #567;
+    --border: #2e4159;
+    --danger: #ff4d6d;
+    --success: #06d6a0;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Hind Siliguri', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* TOP NAV */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .topbar-sub { font-size: 11px; color: var(--text2); }
+  .lang-toggle {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 4px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .lang-toggle:hover { background: var(--accent); color: #000; }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .nav-btn {
+    flex: 1;
+    padding: 10px 4px;
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    font-family: inherit;
+    transition: color 0.2s;
+  }
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn svg { width: 22px; height: 22px; }
+
+  /* PAGES */
+  .page { display: none; padding: 16px 16px 80px; }
+  .page.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+
+  /* SUMMARY STRIP */
+  .summary-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .strip-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 8px;
+    text-align: center;
+  }
+  .strip-val { font-size: 20px; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+  .strip-lbl { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  /* FORM ELEMENTS */
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 13px; color: var(--text2); margin-bottom: 6px; display: block; }
+  .form-input, .form-select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--accent); }
+  .form-select option { background: var(--surface2); }
+
+  /* BUTTONS */
+  .btn {
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #00ffcc; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-full { width: 100%; justify-content: center; }
+
+  /* MEAL GRID */
+  .meal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .meal-slot {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .meal-slot.on { border-color: var(--accent); background: rgba(0,212,170,0.1); }
+  .meal-slot.off { border-color: var(--border); }
+  .meal-slot-name { font-size: 13px; font-weight: 600; }
+  .meal-slot-count { font-size: 22px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+  .meal-slot-btns { display: flex; justify-content: center; gap: 6px; margin-top: 6px; }
+  .meal-slot-btns button {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--surface3);
+    color: var(--text);
+    transition: all 0.2s;
+  }
+  .meal-slot-btns button:hover { background: var(--accent); color: #000; }
+
+  /* MEMBER LIST */
+  .member-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+  }
+  .member-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .member-info { flex: 1; }
+  .member-name { font-weight: 600; font-size: 15px; }
+  .member-stats { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .member-actions { display: flex; gap: 6px; }
+
+  /* BAZAR LIST */
+  .bazar-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+  }
+  .bazar-left .bazar-who { font-weight: 600; }
+  .bazar-left .bazar-date { font-size: 12px; color: var(--text2); }
+  .bazar-amount { font-family: 'JetBrains Mono', monospace; font-size: 18px; color: var(--accent3); font-weight: 600; }
+
+  /* BILL TABLE */
+  .bill-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .bill-table th {
+    background: var(--surface2);
+    padding: 10px 8px;
+    text-align: left;
+    font-size: 11px;
+    color: var(--text2);
+    text-transform: uppercase;
+  }
+  .bill-table td { padding: 10px 8px; border-bottom: 1px solid var(--border); }
+  .bill-table tr:last-child td { border-bottom: none; }
+  .positive { color: var(--danger); font-weight: 700; }
+  .negative { color: var(--success); font-weight: 700; }
+
+  /* DATE PICKER ROW */
+  .date-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .date-row .form-input { flex: 1; }
+
+  /* MONTH SELECTOR */
+  .month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    margin-bottom: 16px;
+  }
+  .month-nav button {
+    background: none; border: none; color: var(--text); cursor: pointer; font-size: 20px; padding: 0 8px;
+  }
+  .month-nav span { font-weight: 700; font-size: 15px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: var(--accent);
+    color: #000;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding: 20px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  .modal-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-close { background: none; border: none; color: var(--text2); font-size: 22px; cursor: pointer; }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .section-title { font-size: 16px; font-weight: 700; }
+
+  .chip {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--surface3);
+    color: var(--text2);
+  }
+  .chip.green { background: rgba(6,214,160,0.15); color: var(--success); }
+  .chip.red { background: rgba(255,77,109,0.15); color: var(--danger); }
+  .chip.yellow { background: rgba(255,209,102,0.15); color: var(--accent3); }
+
+  .divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text3);
+  }
+  .empty-state .icon { font-size: 40px; margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; }
+
+  /* deposit badge */
+  .deposit-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent3);
+  }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div>
+    <div class="topbar-title" id="app-title">🍽️ মেস ম্যানেজার</div>
+    <div class="topbar-sub" id="app-month"></div>
+  </div>
+  <button class="lang-toggle" onclick="toggleLang()" id="lang-btn">EN</button>
+</div>
+
+<!-- PAGES -->
+
+<!-- HOME / DASHBOARD -->
+<div class="page active" id="page-home">
+  <div class="summary-strip">
+    <div class="strip-item">
+      <div class="strip-val" id="dash-members">0</div>
+      <div class="strip-lbl" id="lbl-members">সদস্য</div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-val" id="dash-bazar">৳0</div>
+      <div class="strip-lbl" id="lbl-bazar">বাজার</div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-val" id="dash-meals">0</div>
+      <div class="strip-lbl" id="lbl-meals">মোট মিল</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" id="lbl-permeal-title">প্রতি মিল খরচ</div>
+    <div style="font-size:32px; font-weight:800; color:var(--accent); font-family:'JetBrains Mono',monospace;" id="dash-permeal">৳0.00</div>
+    <div style="font-size:12px; color:var(--text2); margin-top:4px;" id="dash-formula"></div>
+  </div>
+
+  <div class="card">
+    <div class="section-header">
+      <div class="card-title" id="lbl-today">আজকের মিল এন্ট্রি</div>
+    </div>
+    <div class="date-row">
+      <input type="date" class="form-input" id="meal-date" style="max-width:180px;">
+    </div>
+    <div class="form-group">
+      <label class="form-label" id="lbl-select-member">সদস্য বেছে নিন</label>
+      <select class="form-select" id="meal-member-select">
+        <option value="">-- সদস্য বেছে নিন --</option>
+      </select>
+    </div>
+    <div class="meal-grid" id="meal-grid">
+      <div class="meal-slot" id="slot-breakfast">
+        <div class="meal-slot-name" id="lbl-breakfast">সকাল</div>
+        <div class="meal-slot-count" id="count-breakfast">0</div>
+        <div class="meal-slot-btns">
+          <button onclick="changeMeal('breakfast',-1)">−</button>
+          <button onclick="changeMeal('breakfast',1)">+</button>
+        </div>
+      </div>
+      <div class="meal-slot" id="slot-lunch">
+        <div class="meal-slot-name" id="lbl-lunch">দুপুর</div>
+        <div class="meal-slot-count" id="count-lunch">0</div>
+        <div class="meal-slot-btns">
+          <button onclick="changeMeal('lunch',-1)">−</button>
+          <button onclick="changeMeal('lunch',1)">+</button>
+        </div>
+      </div>
+      <div class="meal-slot" id="slot-dinner">
+        <div class="meal-slot-name" id="lbl-dinner">রাত</div>
+        <div class="meal-slot-count" id="count-dinner">0</div>
+        <div class="meal-slot-btns">
+          <button onclick="changeMeal('dinner',-1)">−</button>
+          <button onclick="changeMeal('dinner',1)">+</button>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-top:14px;" onclick="saveMealEntry()" id="btn-save-meal">✓ মিল সেভ করুন</button>
+  </div>
+</div>
+
+<!-- BAZAR PAGE -->
+<div class="page" id="page-bazar">
+  <div class="section-header" style="margin-bottom:16px;">
+    <div class="section-title" id="lbl-bazar-page">বাজার এন্ট্রি</div>
+    <button class="btn btn-primary btn-sm" onclick="openBazarModal()" id="btn-add-bazar">+ যোগ করুন</button>
+  </div>
+
+  <div class="month-nav">
+    <button onclick="changeMonth(-1)">‹</button>
+    <span id="bazar-month-label"></span>
+    <button onclick="changeMonth(1)">›</button>
+  </div>
+
+  <div id="bazar-list"></div>
+</div>
+
+<!-- MEMBERS PAGE -->
+<div class="page" id="page-members">
+  <div class="section-header" style="margin-bottom:16px;">
+    <div class="section-title" id="lbl-members-page">সদস্য তালিকা</div>
+    <button class="btn btn-primary btn-sm" onclick="openMemberModal()" id="btn-add-member">+ যোগ করুন</button>
+  </div>
+  <div id="member-list"></div>
+</div>
+
+<!-- BILL PAGE -->
+<div class="page" id="page-bill">
+  <div class="section-title" style="margin-bottom:16px;" id="lbl-bill-page">মাসিক হিসাব</div>
+
+  <div class="month-nav">
+    <button onclick="changeMonth(-1)">‹</button>
+    <span id="bill-month-label"></span>
+    <button onclick="changeMonth(1)">›</button>
+  </div>
+
+  <div class="card" style="margin-bottom:12px;" id="bill-summary-card">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;" id="bill-summary-grid"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" id="lbl-bill-detail">বিস্তারিত হিসাব</div>
+    <div style="overflow-x:auto;">
+      <table class="bill-table">
+        <thead>
+          <tr>
+            <th id="th-name">নাম</th>
+            <th id="th-meals">মিল</th>
+            <th id="th-bill">বিল</th>
+            <th id="th-deposit">জমা</th>
+            <th id="th-balance">পাওনা/দেনা</th>
+          </tr>
+        </thead>
+        <tbody id="bill-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="showPage('home',this)" id="nav-home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span id="nav-lbl-home">হোম</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('bazar',this)" id="nav-bazar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+    <span id="nav-lbl-bazar">বাজার</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('members',this)" id="nav-members">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span id="nav-lbl-members">সদস্য</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('bill',this)" id="nav-bill">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    <span id="nav-lbl-bill">হিসাব</span>
+  </button>
+</nav>
+
+<!-- MODALS -->
+
+<!-- Add Member Modal -->
+<div class="modal-overlay" id="member-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modal-member-title">নতুন সদস্য যোগ করুন</span>
+      <button class="modal-close" onclick="closeModal('member-modal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label" id="lbl-name">নাম</label>
+      <input class="form-input" id="member-name-input" placeholder="সদস্যের নাম লিখুন">
+    </div>
+    <div class="form-group">
+      <label class="form-label" id="lbl-deposit">জমা (৳)</label>
+      <input class="form-input" type="number" id="member-deposit-input" placeholder="0">
+    </div>
+    <button class="btn btn-primary btn-full" onclick="saveMember()" id="btn-save-member">সেভ করুন</button>
+  </div>
+</div>
+
+<!-- Add Bazar Modal -->
+<div class="modal-overlay" id="bazar-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modal-bazar-title">বাজার এন্ট্রি যোগ করুন</span>
+      <button class="modal-close" onclick="closeModal('bazar-modal')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label" id="lbl-bazar-who">কে বাজার করেছে</label>
+      <select class="form-select" id="bazar-member-select">
+        <option value="">-- সদস্য বেছে নিন --</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label" id="lbl-bazar-amount">পরিমাণ (৳)</label>
+      <input class="form-input" type="number" id="bazar-amount-input" placeholder="0">
+    </div>
+    <div class="form-group">
+      <label class="form-label" id="lbl-bazar-date">তারিখ</label>
+      <input class="form-input" type="date" id="bazar-date-input">
+    </div>
+    <div class="form-group">
+      <label class="form-label" id="lbl-bazar-note">নোট (ঐচ্ছিক)</label>
+      <input class="form-input" id="bazar-note-input" placeholder="যেমন: সবজি, মাছ...">
+    </div>
+    <button class="btn btn-primary btn-full" onclick="saveBazar()" id="btn-save-bazar">সেভ করুন</button>
+  </div>
+</div>
+
+<!-- Deposit Modal -->
+<div class="modal-overlay" id="deposit-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modal-deposit-title">জমা আপডেট করুন</span>
+      <button class="modal-close" onclick="closeModal('deposit-modal')">✕</button>
+    </div>
+    <div id="deposit-member-name" style="font-weight:700; font-size:16px; margin-bottom:12px;"></div>
+    <div class="form-group">
+      <label class="form-label">মোট জমা (৳)</label>
+      <input class="form-input" type="number" id="deposit-input" placeholder="0">
+    </div>
+    <button class="btn btn-primary btn-full" onclick="saveDeposit()" id="btn-save-deposit">সেভ করুন</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ STATE ============
+let lang = 'bn';
+let currentMonth = new Date().toISOString().slice(0,7); // YYYY-MM
+let editingMemberId = null;
+let editingDepositId = null;
+
+const T = {
+  bn: {
+    appTitle: '🍽️ মেস ম্যানেজার',
+    members: 'সদস্য', bazar: 'বাজার', meals: 'মোট মিল',
+    perMealTitle: 'প্রতি মিল খরচ',
+    todayMeal: 'আজকের মিল এন্ট্রি',
+    selectMember: 'সদস্য বেছে নিন',
+    breakfast: 'সকাল', lunch: 'দুপুর', dinner: 'রাত',
+    saveMeal: '✓ মিল সেভ করুন',
+    bazarPage: 'বাজার এন্ট্রি', addBazar: '+ যোগ করুন',
+    membersPage: 'সদস্য তালিকা', addMember: '+ যোগ করুন',
+    billPage: 'মাসিক হিসাব',
+    navHome: 'হোম', navBazar: 'বাজার', navMembers: 'সদস্য', navBill: 'হিসাব',
+    addMemberTitle: 'নতুন সদস্য যোগ করুন', editMemberTitle: 'সদস্য এডিট করুন',
+    name: 'নাম', deposit: 'জমা (৳)', save: 'সেভ করুন',
+    bazarWho: 'কে বাজার করেছে', bazarAmount: 'পরিমাণ (৳)', bazarDate: 'তারিখ', bazarNote: 'নোট (ঐচ্ছিক)',
+    addBazarTitle: 'বাজার এন্ট্রি যোগ করুন',
+    depositTitle: 'জমা আপডেট করুন',
+    thName: 'নাম', thMeals: 'মিল', thBill: 'বিল (৳)', thDeposit: 'জমা (৳)', thBalance: 'পাওনা/দেনা',
+    totalBazar: 'মোট বাজার', totalMeals: 'মোট মিল', perMeal: 'প্রতি মিল', members2: 'সদস্য সংখ্যা',
+    noMembers: 'কোন সদস্য নেই। + বাটন দিয়ে যোগ করুন।',
+    noBazar: 'এই মাসে কোন বাজার এন্ট্রি নেই।',
+    mealSaved: '✓ মিল সেভ হয়েছে',
+    memberSaved: '✓ সদস্য সেভ হয়েছে',
+    bazarSaved: '✓ বাজার সেভ হয়েছে',
+    depositSaved: '✓ জমা আপডেট হয়েছে',
+    deleted: '✓ মুছে ফেলা হয়েছে',
+    fillAll: '⚠ সব তথ্য পূরণ করুন',
+    owed: 'পাবে', owes: 'দেবে', settled: 'সমান',
+    formula: 'মোট বাজার ÷ মোট মিল',
+    langBtn: 'EN',
+    months: ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'],
+    edit: 'এডিট', delete: 'মুছুন', updateDeposit: 'জমা'
+  },
+  en: {
+    appTitle: '🍽️ Mess Manager',
+    members: 'Members', bazar: 'Market', meals: 'Total Meals',
+    perMealTitle: 'Cost Per Meal',
+    todayMeal: "Today's Meal Entry",
+    selectMember: 'Select Member',
+    breakfast: 'Breakfast', lunch: 'Lunch', dinner: 'Dinner',
+    saveMeal: '✓ Save Meal',
+    bazarPage: 'Market Entry', addBazar: '+ Add',
+    membersPage: 'Member List', addMember: '+ Add',
+    billPage: 'Monthly Bill',
+    navHome: 'Home', navBazar: 'Market', navMembers: 'Members', navBill: 'Bill',
+    addMemberTitle: 'Add New Member', editMemberTitle: 'Edit Member',
+    name: 'Name', deposit: 'Deposit (৳)', save: 'Save',
+    bazarWho: 'Who did the shopping', bazarAmount: 'Amount (৳)', bazarDate: 'Date', bazarNote: 'Note (optional)',
+    addBazarTitle: 'Add Market Entry',
+    depositTitle: 'Update Deposit',
+    thName: 'Name', thMeals: 'Meals', thBill: 'Bill (৳)', thDeposit: 'Deposit (৳)', thBalance: 'Balance',
+    totalBazar: 'Total Market', totalMeals: 'Total Meals', perMeal: 'Per Meal', members2: 'Members',
+    noMembers: 'No members. Add using + button.',
+    noBazar: 'No market entries this month.',
+    mealSaved: '✓ Meal saved',
+    memberSaved: '✓ Member saved',
+    bazarSaved: '✓ Market entry saved',
+    depositSaved: '✓ Deposit updated',
+    deleted: '✓ Deleted',
+    fillAll: '⚠ Fill all fields',
+    owed: 'Gets back', owes: 'Owes', settled: 'Settled',
+    formula: 'Total Market ÷ Total Meals',
+    langBtn: 'বাং',
+    months: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+    edit: 'Edit', delete: 'Del', updateDeposit: 'Deposit'
+  }
+};
+
+// ============ STORAGE ============
+function load(key) {
+  try { return JSON.parse(localStorage.getItem(key)) || null; } catch { return null; }
+}
+function save(key, val) {
+  localStorage.setItem(key, JSON.stringify(val));
+}
+
+function getMembers() { return load('mess_members') || []; }
+function saveMembers(m) { save('mess_members', m); }
+function getBazarEntries() { return load('mess_bazar') || []; }
+function saveBazarEntries(b) { save('mess_bazar', b); }
+function getMealEntries() { return load('mess_meals') || []; }
+function saveMealEntries(m) { save('mess_meals', m); }
+
+// ============ HELPERS ============
+function t(key) { return T[lang][key] || key; }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function fmt(n) { return '৳' + parseFloat(n||0).toFixed(2); }
+function fmtEn(n) { return '৳' + parseFloat(n||0).toFixed(2); }
+function getMonthName(ym) {
+  const [y, m] = ym.split('-');
+  return T[lang].months[parseInt(m)-1] + ' ' + y;
+}
+function initials(name) { return name ? name[0].toUpperCase() : '?'; }
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// ============ NAV ============
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'bazar') renderBazar();
+  if (name === 'members') renderMembers();
+  if (name === 'bill') renderBill();
+  if (name === 'home') renderDash();
+}
+
+// ============ MONTH NAV ============
+function changeMonth(dir) {
+  const [y, m] = currentMonth.split('-').map(Number);
+  const d = new Date(y, m - 1 + dir, 1);
+  currentMonth = d.toISOString().slice(0,7);
+  renderBazar(); renderBill();
+  document.getElementById('bazar-month-label').textContent = getMonthName(currentMonth);
+  document.getElementById('bill-month-label').textContent = getMonthName(currentMonth);
+}
+
+// ============ DASHBOARD ============
+function renderDash() {
+  const members = getMembers();
+  const bazar = getBazarEntries().filter(b => b.month === currentMonth);
+  const meals = getMealEntries().filter(m => m.month === currentMonth);
+
+  const totalBazar = bazar.reduce((s, b) => s + (b.amount||0), 0);
+  const totalMeals = meals.reduce((s, m) => s + (m.breakfast||0) + (m.lunch||0) + (m.dinner||0), 0);
+  const perMeal = totalMeals > 0 ? totalBazar / totalMeals : 0;
+
+  document.getElementById('dash-members').textContent = members.length;
+  document.getElementById('dash-bazar').textContent = '৳' + Math.round(totalBazar);
+  document.getElementById('dash-meals').textContent = totalMeals;
+  document.getElementById('dash-permeal').textContent = '৳' + perMeal.toFixed(2);
+  document.getElementById('dash-formula').textContent = t('formula') + ': ' + Math.round(totalBazar) + ' ÷ ' + totalMeals;
+  document.getElementById('app-month').textContent = getMonthName(currentMonth);
+}
+
+// ============ MEAL ENTRY ============
+let mealCounts = { breakfast: 0, lunch: 0, dinner: 0 };
+
+function changeMeal(type, delta) {
+  mealCounts[type] = Math.max(0, (mealCounts[type]||0) + delta);
+  document.getElementById('count-' + type).textContent = mealCounts[type];
+  document.getElementById('slot-' + type).classList.toggle('on', mealCounts[type] > 0);
+}
+
+function saveMealEntry() {
+  const memberId = document.getElementById('meal-member-select').value;
+  const date = document.getElementById('meal-date').value;
+  if (!memberId || !date) { showToast(t('fillAll')); return; }
+
+  const month = date.slice(0,7);
+  const meals = getMealEntries();
+  const idx = meals.findIndex(m => m.memberId === memberId && m.date === date);
+  const entry = { id: uid(), memberId, date, month, ...mealCounts };
+
+  if (idx >= 0) meals[idx] = { ...meals[idx], ...mealCounts };
+  else meals.push(entry);
+
+  saveMealEntries(meals);
+  mealCounts = { breakfast: 0, lunch: 0, dinner: 0 };
+  ['breakfast','lunch','dinner'].forEach(t2 => {
+    document.getElementById('count-' + t2).textContent = 0;
+    document.getElementById('slot-' + t2).classList.remove('on');
+  });
+  renderDash();
+  showToast(t('mealSaved'));
+}
+
+// Load existing entry when member/date changes
+function loadExistingMeal() {
+  const memberId = document.getElementById('meal-member-select').value;
+  const date = document.getElementById('meal-date').value;
+  if (!memberId || !date) return;
+  const meals = getMealEntries();
+  const entry = meals.find(m => m.memberId === memberId && m.date === date);
+  if (entry) {
+    mealCounts = { breakfast: entry.breakfast||0, lunch: entry.lunch||0, dinner: entry.dinner||0 };
+  } else {
+    mealCounts = { breakfast: 0, lunch: 0, dinner: 0 };
+  }
+  ['breakfast','lunch','dinner'].forEach(t2 => {
+    document.getElementById('count-' + t2).textContent = mealCounts[t2];
+    document.getElementById('slot-' + t2).classList.toggle('on', mealCounts[t2] > 0);
+  });
+}
+
+// ============ MEMBERS ============
+function renderMembers() {
+  const members = getMembers();
+  const el = document.getElementById('member-list');
+  if (!members.length) {
+    el.innerHTML = `<div class="empty-state"><div class="icon">👥</div><p>${t('noMembers')}</p></div>`;
+    return;
+  }
+  el.innerHTML = members.map(m => `
+    <div class="member-item">
+      <div class="member-avatar">${initials(m.name)}</div>
+      <div class="member-info">
+        <div class="member-name">${m.name}</div>
+        <div class="member-stats"><span class="deposit-badge">${fmt(m.deposit||0)}</span> ${t('deposit').replace(' (৳)','')}</div>
+      </div>
+      <div class="member-actions">
+        <button class="btn btn-outline btn-sm" onclick="openDepositModal('${m.id}')">${t('updateDeposit')}</button>
+        <button class="btn btn-outline btn-sm" onclick="openMemberModal('${m.id}')">${t('edit')}</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteMember('${m.id}')">${t('delete')}</button>
+      </div>
+    </div>
+  `).join('');
+  updateMealSelect();
+}
+
+function openMemberModal(id) {
+  editingMemberId = id || null;
+  const modal = document.getElementById('member-modal');
+  document.getElementById('modal-member-title').textContent = id ? t('editMemberTitle') : t('addMemberTitle');
+  if (id) {
+    const m = getMembers().find(x => x.id === id);
+    document.getElementById('member-name-input').value = m.name;
+    document.getElementById('member-deposit-input').value = m.deposit || 0;
+  } else {
+    document.getElementById('member-name-input').value = '';
+    document.getElementById('member-deposit-input').value = '';
+  }
+  modal.classList.add('open');
+}
+
+function saveMember() {
+  const name = document.getElementById('member-name-input').value.trim();
+  const deposit = parseFloat(document.getElementById('member-deposit-input').value) || 0;
+  if (!name) { showToast(t('fillAll')); return; }
+
+  const members = getMembers();
+  if (editingMemberId) {
+    const idx = members.findIndex(m => m.id === editingMemberId);
+    if (idx >= 0) members[idx] = { ...members[idx], name, deposit };
+  } else {
+    members.push({ id: uid(), name, deposit });
+  }
+  saveMembers(members);
+  closeModal('member-modal');
+  renderMembers();
+  renderDash();
+  showToast(t('memberSaved'));
+}
+
+function deleteMember(id) {
+  if (!confirm('সদস্য মুছে ফেলবেন?')) return;
+  saveMembers(getMembers().filter(m => m.id !== id));
+  renderMembers();
+  renderDash();
+  showToast(t('deleted'));
+}
+
+function openDepositModal(id) {
+  editingDepositId = id;
+  const m = getMembers().find(x => x.id === id);
+  document.getElementById('deposit-member-name').textContent = m.name;
+  document.getElementById('deposit-input').value = m.deposit || 0;
+  document.getElementById('deposit-modal').classList.add('open');
+}
+
+function saveDeposit() {
+  const deposit = parseFloat(document.getElementById('deposit-input').value) || 0;
+  const members = getMembers();
+  const idx = members.findIndex(m => m.id === editingDepositId);
+  if (idx >= 0) members[idx].deposit = deposit;
+  saveMembers(members);
+  closeModal('deposit-modal');
+  renderMembers();
+  renderBill();
+  showToast(t('depositSaved'));
+}
+
+// ============ BAZAR ============
+function renderBazar() {
+  const all = getBazarEntries().filter(b => b.month === currentMonth);
+  const el = document.getElementById('bazar-list');
+  const members = getMembers();
+
+  if (!all.length) {
+    el.innerHTML = `<div class="empty-state"><div class="icon">🛒</div><p>${t('noBazar')}</p></div>`;
+    return;
+  }
+
+  const total = all.reduce((s, b) => s + (b.amount||0), 0);
+  let html = `<div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+    <span style="color:var(--text2);font-size:13px;">${t('totalBazar')}</span>
+    <span style="font-family:'JetBrains Mono';font-size:22px;color:var(--accent3);font-weight:700;">${fmt(total)}</span>
+  </div>`;
+
+  html += all.sort((a,b) => b.date.localeCompare(a.date)).map(b => {
+    const who = members.find(m => m.id === b.memberId);
+    return `<div class="bazar-item">
+      <div class="bazar-left">
+        <div class="bazar-who">${who ? who.name : '?'}</div>
+        <div class="bazar-date">${b.date}${b.note ? ' · ' + b.note : ''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="bazar-amount">${fmt(b.amount)}</div>
+        <button class="btn btn-danger btn-sm" onclick="deleteBazar('${b.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = html;
+}
+
+function openBazarModal() {
+  const members = getMembers();
+  const sel = document.getElementById('bazar-member-select');
+  sel.innerHTML = `<option value="">-- ${t('selectMember')} --</option>` +
+    members.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+  document.getElementById('bazar-amount-input').value = '';
+  document.getElementById('bazar-date-input').value = new Date().toISOString().slice(0,10);
+  document.getElementById('bazar-note-input').value = '';
+  document.getElementById('bazar-modal').classList.add('open');
+}
+
+function saveBazar() {
+  const memberId = document.getElementById('bazar-member-select').value;
+  const amount = parseFloat(document.getElementById('bazar-amount-input').value);
+  const date = document.getElementById('bazar-date-input').value;
+  const note = document.getElementById('bazar-note-input').value.trim();
+  if (!memberId || !amount || !date) { showToast(t('fillAll')); return; }
+
+  const entries = getBazarEntries();
+  entries.push({ id: uid(), memberId, amount, date, note, month: date.slice(0,7) });
+  saveBazarEntries(entries);
+  closeModal('bazar-modal');
+  renderBazar();
+  renderDash();
+  showToast(t('bazarSaved'));
+}
+
+function deleteBazar(id) {
+  saveBazarEntries(getBazarEntries().filter(b => b.id !== id));
+  renderBazar();
+  renderDash();
+  showToast(t('deleted'));
+}
+
+// ============ BILL ============
+function renderBill() {
+  const members = getMembers();
+  const bazar = getBazarEntries().filter(b => b.month === currentMonth);
+  const meals = getMealEntries().filter(m => m.month === currentMonth);
+
+  const totalBazar = bazar.reduce((s, b) => s + (b.amount||0), 0);
+  const totalMeals = meals.reduce((s, m) => s + (m.breakfast||0) + (m.lunch||0) + (m.dinner||0), 0);
+  const perMeal = totalMeals > 0 ? totalBazar / totalMeals : 0;
+
+  document.getElementById('bill-summary-grid').innerHTML = `
+    <div class="strip-item"><div class="strip-val">৳${Math.round(totalBazar)}</div><div class="strip-lbl">${t('totalBazar')}</div></div>
+    <div class="strip-item"><div class="strip-val">${totalMeals}</div><div class="strip-lbl">${t('totalMeals')}</div></div>
+    <div class="strip-item"><div class="strip-val">৳${perMeal.toFixed(2)}</div><div class="strip-lbl">${t('perMeal')}</div></div>
+    <div class="strip-item"><div class="strip-val">${members.length}</div><div class="strip-lbl">${t('members2')}</div></div>
+  `;
+
+  const tbody = document.getElementById('bill-table-body');
+  if (!members.length) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px;">${t('noMembers')}</td></tr>`; return; }
+
+  tbody.innerHTML = members.map(member => {
+    const myMeals = meals.filter(m => m.memberId === member.id)
+      .reduce((s, m) => s + (m.breakfast||0) + (m.lunch||0) + (m.dinner||0), 0);
+    const myBill = myMeals * perMeal;
+    const myDeposit = member.deposit || 0;
+    const balance = myDeposit - myBill;
+
+    let balanceHtml;
+    if (Math.abs(balance) < 0.5) {
+      balanceHtml = `<span class="chip green">${t('settled')}</span>`;
+    } else if (balance > 0) {
+      balanceHtml = `<span class="negative">+${fmt(balance)}</span>`;
+    } else {
+      balanceHtml = `<span class="positive">${fmt(balance)}</span>`;
+    }
+
+    return `<tr>
+      <td><strong>${member.name}</strong></td>
+      <td><span style="font-family:'JetBrains Mono'">${myMeals}</span></td>
+      <td><span style="font-family:'JetBrains Mono'">${fmt(myBill)}</span></td>
+      <td><span style="font-family:'JetBrains Mono';color:var(--accent3)">${fmt(myDeposit)}</span></td>
+      <td>${balanceHtml}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ============ MODAL ============
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ============ MEMBER SELECT ============
+function updateMealSelect() {
+  const members = getMembers();
+  const sel = document.getElementById('meal-member-select');
+  sel.innerHTML = `<option value="">-- ${t('selectMember')} --</option>` +
+    members.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+}
+
+// ============ LANGUAGE ============
+function toggleLang() {
+  lang = lang === 'bn' ? 'en' : 'bn';
+  applyLang();
+}
+
+function applyLang() {
+  document.getElementById('lang-btn').textContent = t('langBtn');
+  document.getElementById('app-title').textContent = t('appTitle');
+  document.getElementById('lbl-members').textContent = t('members');
+  document.getElementById('lbl-bazar').textContent = t('bazar');
+  document.getElementById('lbl-meals').textContent = t('meals');
+  document.getElementById('lbl-permeal-title').textContent = t('perMealTitle');
+  document.getElementById('lbl-today').textContent = t('todayMeal');
+  document.getElementById('lbl-select-member').textContent = t('selectMember');
+  document.getElementById('lbl-breakfast').textContent = t('breakfast');
+  document.getElementById('lbl-lunch').textContent = t('lunch');
+  document.getElementById('lbl-dinner').textContent = t('dinner');
+  document.getElementById('btn-save-meal').textContent = t('saveMeal');
+  document.getElementById('lbl-bazar-page').textContent = t('bazarPage');
+  document.getElementById('btn-add-bazar').textContent = t('addBazar');
+  document.getElementById('lbl-members-page').textContent = t('membersPage');
+  document.getElementById('btn-add-member').textContent = t('addMember');
+  document.getElementById('lbl-bill-page').textContent = t('billPage');
+  document.getElementById('nav-lbl-home').textContent = t('navHome');
+  document.getElementById('nav-lbl-bazar').textContent = t('navBazar');
+  document.getElementById('nav-lbl-members').textContent = t('navMembers');
+  document.getElementById('nav-lbl-bill').textContent = t('navBill');
+  document.getElementById('modal-member-title').textContent = t('addMemberTitle');
+  document.getElementById('lbl-name').textContent = t('name');
+  document.getElementById('lbl-deposit').textContent = t('deposit');
+  document.getElementById('btn-save-member').textContent = t('save');
+  document.getElementById('lbl-bazar-who').textContent = t('bazarWho');
+  document.getElementById('lbl-bazar-amount').textContent = t('bazarAmount');
+  document.getElementById('lbl-bazar-date').textContent = t('bazarDate');
+  document.getElementById('lbl-bazar-note').textContent = t('bazarNote');
+  document.getElementById('btn-save-bazar').textContent = t('save');
+  document.getElementById('modal-deposit-title').textContent = t('depositTitle');
+  document.getElementById('btn-save-deposit').textContent = t('save');
+  document.getElementById('th-name').textContent = t('thName');
+  document.getElementById('th-meals').textContent = t('thMeals');
+  document.getElementById('th-bill').textContent = t('thBill');
+  document.getElementById('th-deposit').textContent = t('thDeposit');
+  document.getElementById('th-balance').textContent = t('thBalance');
+  document.getElementById('app-month').textContent = getMonthName(currentMonth);
+  document.getElementById('bazar-month-label').textContent = getMonthName(currentMonth);
+  document.getElementById('bill-month-label').textContent = getMonthName(currentMonth);
+  renderDash(); renderBazar(); renderMembers(); renderBill();
+}
+
+// ============ INIT ============
+document.getElementById('meal-date').value = new Date().toISOString().slice(0,10);
+document.getElementById('meal-date').addEventListener('change', loadExistingMeal);
+document.getElementById('meal-member-select').addEventListener('change', loadExistingMeal);
+
+applyLang();
+renderDash();
+</script>
+
+</body>
+</html>
